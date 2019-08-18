@@ -16,6 +16,7 @@ export default class App extends React.Component {
         this.handleChange = this.handleChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
         this.currencyConvert = this.currencyConvert.bind(this);
+        this.setExpense = this.setExpense.bind(this);
     }
 
     handleChange(e, type) {
@@ -24,15 +25,7 @@ export default class App extends React.Component {
     }
 
     handleSubmit(e) {
-        console.log('Total Expenses: ' + this.state.expense)
-        let a = this.state.expense + this.state.value;
-        this.setState({ expense: a })
-        console.log('Total Expenses: ' + this.state.value)
-        console.log('Total Expenses: ' + this.state.expense)
-        // if (this.state.counter > 1) {
-        //     this.setState({ expense: this.state.expense + this.state.value });
-        // }
-        if (this.state.counter > 5) {
+        if (this.state.counter > 4) {
             console.log('Total Expensess: ' + this.state.expense)
         }
         this.setState({ counter: this.state.counter + 1, description: '', value: 0 });
@@ -43,24 +36,30 @@ export default class App extends React.Component {
 
         axios.get(`https://api.exchangeratesapi.io/latest?base=${e.target.value}`).then(res => {
             let conversionRate = res.data.rates.CAD;
-            let convertedRate = this.state.value * conversionRate;
+            let convertedRate = parseFloat(this.state.value) * conversionRate;
             this.setState({ expense: convertedRate });
-            // console.log(this.state.expense)
         })
+    }
+
+    setExpense() {
+        let expense = parseFloat(this.state.expense) + parseFloat(this.state.value);
+        this.setState({ expense: expense })
     }
 
     render() {
         return (
             <div className="App">
                 <h1>Expense Report Generator</h1>
-                <h2>Report #: {this.state.counter}</h2>
+                {
+                    (this.state.counter < 6) ? <h2>Report #: {this.state.counter}</h2> : <h2>Expense Report Generated: ${this.state.expense} CAD</h2>
+                }
                 <div className="container">
                     <form onSubmit={this.handleSubmit}>
                         <label>
                             Description: <input type="text" value={this.state.description} name="Description" onChange={(item) => this.handleChange(item, 'description')} />
                         </label>
                         <label>
-                            Amount: <input type="text" value={this.state.value} onChange={(item) => this.handleChange(item, 'value')} name="Amount" />
+                            Amount: <input type="number" value={this.state.value} onBlur={this.setExpense} onChange={(item) => this.handleChange(item, 'value')} name="Amount" />
                         </label>
                         <label>
                             Currency: <select value={this.state.currency} onChange={this.currencyConvert}>
